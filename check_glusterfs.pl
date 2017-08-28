@@ -109,6 +109,31 @@ sub fetchinfo {
 	close $gh
 }
 
+sub fetchvolumesizes {
+	my $units = 'M';
+	foreach my $v (keys %$vols) {
+		my @stdout = `df -aB$units`;
+		@stdout = grep { /localhost:\/$v\s/ } @stdout;
+		if (scalar(@stdout) == 0) {
+			# mount it
+			`mkdir -p /mnt/$v 2>&1 && mount -t glusterfs localhost:/$v /mnt/$v`;
+			@stdout = `df -aB$units`;
+		}
+		foreach (@stdout) {
+			if (/localhost:\/$v\s+([0-9]+)$units\s+([0-9]+)$units\s+([0-9]+)$units/) {
+				my ($size, $used, $free) = ($1, $2, $3);
+				push @perfdata, sprintf "'%s_used'=%d%s;%d;%d;0;%d",
+					$v,
+					$used, $units."B",
+					$size / 100 * $thrs->{'diskwarn'},
+					$size / 100 * $thrs->{'diskcrit'},
+					$size;
+				last;
+			}
+		}
+	}
+}
+
 sub fetchheal {
 	my $bi;
 	foreach my $v (keys %$vols) {
@@ -219,6 +244,7 @@ fetchheal;
 
 $status = 0;
 check;
+fetchvolumesizes if ($thrs->{'perfdata'});
 @out = ("Everything is OK") 
 	if (scalar(@out) == 0);
 nagexit $status, join ", ", @out
