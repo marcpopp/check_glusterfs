@@ -157,6 +157,30 @@ sub fetchheal {
 	}
 }
 
+sub check_peer_status {
+	my $hostname;
+	my $failed_count = 0;
+	open my $gh, "gluster peer status 2>&1|"
+		or nagexit 3, $@;
+	while (<$gh>) {
+		if (/^Hostname: (.*)$/) {
+			$hostname = $1;
+			next;
+		}
+		next unless $hostname;
+		if (/^State: (.+)$/) {
+			my $state = $1;
+			if ($state ne 'Peer in Cluster (Connected)') {
+				push @out, sprintf("Peer '%s' is in non-acceptable state '%s'", $hostname, $state);
+				$failed_count++;
+				x_warn if ($failed_count == 1);
+				x_crit if ($failed_count > 1);
+			}
+		}
+	}
+	close $gh
+}
+
 sub check {
 	foreach (keys %$vols) {
 		# warn on stopped volumes
@@ -244,6 +268,7 @@ fetchheal;
 
 $status = 0;
 check;
+check_peer_status;
 fetchvolumesizes if ($thrs->{'perfdata'});
 @out = ("Everything is OK") 
 	if (scalar(@out) == 0);
