@@ -47,7 +47,7 @@ GetOptions(
 ) or pod2usage({'-exitval' => 3, '-verbose' => 0});
 
 sub fetchinfo {
-	my ($v, $gh, $bi);
+	my ($v, $gh, $bi, @types);
 	open $gh, "gluster volume info $thrs->{'volume'} 2>/dev/null|" or die $@;
 	while (<$gh>) {
 		$v = $1 if /^Volume Name: (.+)$/;
@@ -55,16 +55,26 @@ sub fetchinfo {
 		if (/^Status: ((?:Start|Stopp|Creat)ed)$/) {
 			$vols->{$v}->{'status'} = $1; next
 		}
-		if (my @tmp = /^Type: (Distribute)?(?:d-)?(Stripe)?(?:d-)?(Replicate)?$/) {
-			@tmp = grep { defined $_ && $_ ne '' } @tmp;
-			%{$vols->{$v}->{'type'}} = map { $_ => { $tmp[$_] => 0}} 0..$#tmp;
+		if (/^Type: (.+)$/) {
+			# Remember the order of the types
+			@types = ();
+			foreach my $t ( split("-", $1) ) {
+				$t =~ s/d$//g;
+				push @types, $t,
+			}
+			# there are always 2 values in the info about brick numbers
+			unshift @types, "Distribute"
+				if (scalar(@types) == 1);
 			next
 		}
 		if (my @tmp = /^Number of Bricks:(?: (\d+) x (\d+)(?: x (\d+))? =)? \d+$/) {
-			@tmp = grep { defined $_ && $_ >= 2 } reverse @tmp;
-			for (my $i = 0; $i <= $#tmp; $i++) {
-				my ($t) = keys %{$vols->{$v}->{'type'}->{$i}};
-				$vols->{$v}->{'type'}->{$i}->{$t} = $tmp[$i]
+			# set the number of bricks per type
+			@tmp = grep { defined $_ && $_ ne '' } @tmp;
+			for (my $i = 0; $i <= $#types; $i++) {
+				if (! defined($tmp[$i])) {
+					nagexit 3, "Cannot read architecture of volume '$v': $_ with types '".join(',', @types)."'";
+				}
+				$vols->{$v}->{'type'}->{ $types[$i] } = $tmp[$i];
 			}
 			next
 		}
@@ -134,13 +144,9 @@ sub check {
 		}
 		
 		# get brick redundancy
-		my ($offline, $redundancy) = (0, 0);
-		foreach my $r (keys %{$vols->{$_}->{'type'}}) {
-			next unless exists $vols->{$_}->{'type'}->{$r}->{'Replicate'};
-			$redundancy = $vols->{$_}->{'type'}->{$r}->{'Replicate'};
-			last
-		}
-		
+		my $offline = 0;
+		my $redundancy = ($vols->{$_}->{'type'}->{'Replicate'} || 1);
+
 		# check bricks
 		foreach my $brick (sort {$vols->{$_}->{'bricks'}->{$a}->{'index'} >
 				$vols->{$_}->{'bricks'}->{$b}->{'index'}}
@@ -213,6 +219,8 @@ fetchheal;
 
 $status = 0;
 check;
+@out = ("Everything is OK") 
+	if (scalar(@out) == 0);
 nagexit $status, join ", ", @out
 
 __END__
