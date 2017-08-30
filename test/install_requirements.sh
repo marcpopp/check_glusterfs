@@ -4,7 +4,7 @@ for dep in $DEPENDENCIES; do
 	echo
 	echo
 	echo $dep
-	perl -M$dep -e '' && echo "$dep already installed" || cpan -i $dep || exit $?
+	perl -M$dep -e '' && echo "$dep already installed" || cpan -f -i $dep || exit $?
 	echo
 done
 
