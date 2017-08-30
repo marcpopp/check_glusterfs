@@ -1,21 +1,18 @@
 version: 2
 jobs:
   build:
-    machine: true
-#    docker:
-#      - image: circleci/python:3.6.1
-#      - image: circleci/postgres:9.6.2
-#        environment:
-#          POSTGRES_USER: root
-#          POSTGRES_DB: circle_test
+#    machine: true
+    docker:
+      - image: perl:latest
     steps:
       - checkout
 #      - restore_cache:
 #          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:
           command: |
+            # Test th help
             . test/environment.sh
-            perl check_glusterfs.pl --help
+            perl check_glusterfs.pl --help || [ "$?" == "3" ]
 #      - save_cache:
 #          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
 #          paths:
