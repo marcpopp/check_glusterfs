@@ -9,11 +9,11 @@ jobs:
       - checkout
       # Install requirements
       - restore_cache:
-          key: requirements-{{ .Branch }}-{{ checksum "test/requirements.txt" }}
+          key: requirements-{{ .Branch }}-{{ checksum "test/install_requirements.sh" }}
       - run:
-          command: "cat test/requirements.txt | xargs cpan -i"
+          command: "test/install_requirements.sh"
       - save_cache:
-          key: requirements-{{ .Branch }}-{{ checksum "test/requirements.txt" }}
+          key: requirements-{{ .Branch }}-{{ checksum "test/install_requirements.sh" }}
           paths:
             - ".cpan"
       # Run tests

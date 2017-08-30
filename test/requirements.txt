@@ -1,4 +1,0 @@
-Clone
-TAP::Harness
-TAP::Formatter::JUnit
-TAP::Formatter::Console`
