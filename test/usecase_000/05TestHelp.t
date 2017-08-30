@@ -12,6 +12,7 @@ my $test_command = 'perl check_glusterfs.pl';
 my $test_params  = '--help';
 my $expected_exitcode = 3;
 
+my (undef, $stdout_filename) = tempfile();
 my (undef, $stderr_filename) = tempfile();
 
 # Adding the Test environment, so we can fake a glsuterfs installation
@@ -20,12 +21,15 @@ function gluster {
 	echo "[TESTENV] call: gluster \$*"
 }
 
-$test_command $test_params 2>$stderr_filename
+$test_command $test_params 2>$stderr_filename >$stdout_filename
 EOD
 ;
 
-my $stdout = `$cmd`;
+open FH, "| bash";
+print FH $cmd;
+close FH;
 my $exitcode = int($?/256);
+my $stdout = `cat $stdout_filename`;
 my $stderr = `cat $stderr_filename`;
 
 
