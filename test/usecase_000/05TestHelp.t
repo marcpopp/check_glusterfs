@@ -28,7 +28,9 @@ my $stdout = `$cmd`;
 my $exitcode = int($?/256);
 my $stderr = `cat $stderr_filename`;
 
+
 is ($exitcode, $expected_exitcode, "Exit code is $expected_exitcode");
-ok ($stderr =~ m/SYNOPSIS/, "Stderr has help text");
+ok ($stderr =~ m/SYNOPSIS/, "Stderr has help text")
+	or print STDERR "STDOUT: $stdout\nSTDERR: $stderr\n";
 
 done_testing();
