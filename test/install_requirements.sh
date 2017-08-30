@@ -1,14 +1,4 @@
-DEPENDENCIES="
-	Moose
-	List::MoreUtils
-	List::MoreUtils:XS
-	MooseX::NonMoose
-	XML::Generator
-	TAP::Formatter::JUnit
-	Clone
-	TAP::Harness
-	TAP::Formatter::Console
-"
+DEPENDENCIES=$( cat `dirname $0`/requirements.txt )
 
 for dep in $DEPENDENCIES; do
 	echo

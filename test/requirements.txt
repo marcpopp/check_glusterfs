@@ -1,0 +1,9 @@
+Moose
+List::MoreUtils:XS
+List::MoreUtils
+MooseX::NonMoose
+XML::Generator
+TAP::Formatter::JUnit
+Clone
+TAP::Harness
+TAP::Formatter::Console
