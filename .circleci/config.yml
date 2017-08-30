@@ -1,9 +1,9 @@
 version: 2
 jobs:
   build:
-#    machine: true
-    docker:
-      - image: perl:5.18.2
+    machine: true
+#    docker:
+#      - image: perl:5.18.2
     steps:
       # Get src
       - checkout
@@ -15,7 +15,7 @@ jobs:
       - save_cache:
           key: requirements-{{ .Branch }}-{{ checksum "test/requirements.txt" }}
           paths:
-            - ".cpan"
+            - "/usr/local/lib/perl5/site_perl"
       # Run tests
       - run:
           command: "perl test/runUseCaseTests.pl --level 999 --output XML"
