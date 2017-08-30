@@ -5,19 +5,21 @@ jobs:
     docker:
       - image: perl:latest
     steps:
+      # Get src
       - checkout
-#      - restore_cache:
-#          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+      # Install requirements
+      - restore_cache:
+          key: requirements-{{ .Branch }}-{{ checksum "test/requirements.txt" }}
       - run:
-          command: |
-            # Test th help
-            . test/environment.sh
-            perl check_glusterfs.pl --help || [ "$?" == "3" ]
-#      - save_cache:
-#          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
-#          paths:
-#            - "venv"
-      - store_artifacts:
+          command: "cat test/requirements.txt | xargs cpan -i"
+      - save_cache:
+          key: requirements-{{ .Branch }}-{{ checksum "test/requirements.txt" }}
+          paths:
+            - ".cpan"
+      # Run tests
+      - run:
+          command: "perl test/runUseCaseTests.pl --level 999 --output XML"
+      # Store test reports
+      - store_test_results:
           path: test-reports/
-          destination: test-reports
 

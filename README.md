@@ -1,6 +1,8 @@
 # check_glusterfs
 A Fork of Philippe Kueck check_glusterfs: https://www.unixadm.org/nagios/check_glusterfs
 
+[![CircleCI](https://circleci.com/gh/marcpopp/check_glusterfs/tree/master.svg?style=svg)](https://circleci.com/gh/marcpopp/check_glusterfs/tree/master)
+
 
 ## Features
 * Check Volume stats
