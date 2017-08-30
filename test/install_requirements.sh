@@ -1,5 +1,6 @@
 DEPENDENCIES="
 	Moose
+	List::MoreUtils
 	MooseX::NonMoose
 	XML::Generator
 	TAP::Formatter::JUnit
