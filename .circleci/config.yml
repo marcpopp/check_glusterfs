@@ -3,7 +3,7 @@ jobs:
   build:
 #    machine: true
     docker:
-      - image: perl:latest
+      - image: perl:5.18.2
     steps:
       # Get src
       - checkout
