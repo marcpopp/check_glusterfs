@@ -10,6 +10,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
+use Data::Dumper;
 
 $|++;
 my ($vols, $status, @out, @perfdata);
@@ -48,7 +49,7 @@ GetOptions(
 
 sub fetchinfo {
 	my ($v, $gh, $bi, @types);
-	open $gh, "gluster volume info $thrs->{'volume'} 2>/dev/null|" or die $@;
+	open $gh, "gluster volume info $thrs->{'volume'}|" or die $@;
 	while (<$gh>) {
 		$v = $1 if /^Volume Name: (.+)$/;
 		next unless $v;
@@ -200,6 +201,8 @@ sub check {
 		foreach my $brick (sort {$vols->{$_}->{'bricks'}->{$a}->{'index'} >
 				$vols->{$_}->{'bricks'}->{$b}->{'index'}}
 				keys %{$vols->{$_}->{'bricks'}}) {
+
+			#print STDERR "Brick ".Dumper($vols->{$_}->{'bricks'}->{$brick});
 			unless ($vols->{$_}->{'bricks'}->{$brick}->{'online'}) {
 				push @out, sprintf "%s_b%d is offline",
 					$_, $vols->{$_}->{'bricks'}->{$brick}->{'index'};
