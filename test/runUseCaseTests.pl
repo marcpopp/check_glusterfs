@@ -111,6 +111,7 @@ sub runTests { # {{{
 		};
 	my $args = { # For the harness
 			#exec => [ 'sudo', 'tools/perlworkingcopy' ],
+			lib => [ '.' ],
 			merge => 1,
 			jobs => $params->{jobs},
 			rules => $rules,
